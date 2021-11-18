@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Scripts/Character.cs" type="Script" id=1]
+[ext_resource path="res://Models/Herited/Chung2.tscn" type="PackedScene" id=2]
+
+[sub_resource type="CapsuleShape" id=2]
+radius = 0.25
+height = 0.5
+
+[node name="Character" type="KinematicBody"]
+collision_layer = 4
+script = ExtResource( 1 )
+Type = 1
+Speed = 50.0
+_model = NodePath("Chung2")
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
+shape = SubResource( 2 )
+
+[node name="WaitTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="Chung2" parent="." instance=ExtResource( 2 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.405336, 0 )
+
+[connection signal="timeout" from="WaitTimer" to="." method="OnWaitTimerTimeout"]

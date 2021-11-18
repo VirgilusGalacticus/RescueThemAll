@@ -1,0 +1,31 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Scripts/RopePart.cs" type="Script" id=1]
+[ext_resource path="res://Models/Herited/Chung2.tscn" type="PackedScene" id=2]
+
+[sub_resource type="CapsuleShape" id=1]
+radius = 0.320021
+height = 2.53565
+
+[node name="RopePart" type="RigidBody"]
+contacts_reported = 5
+contact_monitor = true
+axis_lock_linear_z = true
+script = ExtResource( 1 )
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -0.0346393, 0 )
+shape = SubResource( 1 )
+
+[node name="HingeJoint" type="HingeJoint" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.69206, 0 )
+angular_limit/enable = true
+angular_limit/upper = 10.0
+angular_limit/lower = -10.0
+angular_limit/relaxation = 0.01
+
+[node name="Chung2" parent="." instance=ExtResource( 2 )]
+transform = Transform( -0.22437, -0.961609, -0.158005, 0.833983, -0.105601, -0.541591, 0.504113, -0.25329, 0.82566, 0.633714, 0.024791, 0.0548553 )
+
+[node name="GrabPosition" type="Position3D" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5523, 0 )
