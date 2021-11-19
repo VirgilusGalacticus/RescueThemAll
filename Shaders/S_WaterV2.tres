@@ -1,0 +1,27 @@
+[gd_resource type="Shader" format=2]
+
+[resource]
+code = "shader_type spatial;
+render_mode specular_toon;
+
+uniform sampler2D normalmap;
+
+void fragment(){
+	vec3 normalMap = texture(normalmap,UV*200.0).rgb;
+	
+	//ROUGHNESS = 0.01;
+	EMISSION += textureLod(SCREEN_TEXTURE,SCREEN_UV,0.1).rgb*0.01;
+	ALPHA =1.0;
+		// Depthtest
+	float depth_tex = textureLod(DEPTH_TEXTURE, SCREEN_UV, 0.0).r;
+	float depth_tex_unpacked = depth_tex * 2.0 - 1.0;
+	float surface_dist = PROJECTION_MATRIX[3][2] / (depth_tex_unpacked + PROJECTION_MATRIX[2][2]);
+	float water_depth = surface_dist + VERTEX.z;
+	
+	NORMALMAP = normalMap;
+	NORMALMAP_DEPTH = 0.5;
+	vec4 world_pos = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth_tex * 2.0 - 1.0, 1.0);
+	world_pos.xyz /= world_pos.w;
+	ALPHA *= clamp(1.0 - smoothstep(world_pos.z + 0.8, world_pos.z, VERTEX.z), 0.0, 1.0);
+	
+}"

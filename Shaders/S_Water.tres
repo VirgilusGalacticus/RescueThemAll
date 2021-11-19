@@ -1,0 +1,39 @@
+[gd_resource type="Shader" format=2]
+
+[resource]
+code = "shader_type spatial;
+render_mode blend_mix,cull_back,diffuse_burley,specular_schlick_ggx;
+
+uniform float beer_factor =2.0;
+uniform vec4 shallow_color:hint_color;//72ccd6
+uniform vec4 depth_color:hint_color;//2695b7
+uniform float blending_factor=1.9;
+uniform float alpha_factor=0.2;
+uniform sampler2D normal_map01;
+uniform sampler2D normal_map02;
+uniform vec2 normals_sizes;
+uniform vec2 normals_power;
+uniform vec2 normals_speeds;
+uniform sampler2D water_gradient;
+
+vec2 polar_coordinates(vec2 uv, vec2 center, float zoom, float repeat)
+{
+	vec2 dir = uv - center;
+	float radius = length(dir) * 2.0;
+	float angle = atan(dir.y, dir.x) * 1.0/(3.1416 * 2.0);
+	return mod(vec2(radius * zoom, angle * repeat), 1.0);
+}
+
+void fragment(){
+	float depth = texture(DEPTH_TEXTURE,SCREEN_UV).r;
+	depth = depth *2.0-1.0;
+	depth = PROJECTION_MATRIX[3][2] / (depth + PROJECTION_MATRIX[2][2]);
+	depth = depth + VERTEX.z;
+	depth = exp(-depth * beer_factor);
+	ROUGHNESS = 1.0;
+	vec4 color = texture(water_gradient,vec2(depth));
+	vec2 polar_uv = polar_coordinates(UV.xy, vec2(0.5), -1.0, 1.0);
+	ALBEDO =  color.rgb;
+	ALPHA = color.a;
+	SPECULAR = 0.1;
+}"
