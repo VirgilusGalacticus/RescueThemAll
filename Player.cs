@@ -20,23 +20,18 @@ public class Player : KinematicBody
     private Vector3 _direction = new Vector3();
     private Vector3 _velocity = new Vector3();
     private HingeJoint _rootJoint;
-    private RopePart _lastAddedRope;
-    private RayCast _landingRay1;
-    private RayCast _landingRay2;
     private Area _rescueArea;
     private AnimationPlayer _animationPlayer;
-    private Position3D _rescuePosition;
+    private Character _characterToRescue;
+    private Godot.Collections.Array<RopePart> _ropes = new Godot.Collections.Array<RopePart>();
+    private RigidBody _grabBody;
 
     public override void _Ready()
     {
         base._Ready();
         _rootJoint = GetNode<HingeJoint>(_hingeJoint);
-        _landingRay1 = GetNode<RayCast>("LandingRay1");
-        _landingRay2 = GetNode<RayCast>("LandingRay2");
         _rescueArea = GetNode<Area>("RescueArea");
         _animationPlayer = GetNode<AnimationPlayer>(_helico+"/AnimationPlayer");
-        _rescuePosition = GetNode<Position3D>("RescuePosition");
-        _rescueArea.Monitoring = false;
     }
     public override void _PhysicsProcess(float delta)
     {
@@ -63,12 +58,19 @@ public class Player : KinematicBody
             _direction.y = 0.0f;
         }
 
-        if(Input.IsActionJustPressed("ui_down") && RopePartNumber >0){
+        if(Input.IsActionJustPressed("interact") && _characterToRescue !=null){
+            _characterToRescue.QueueFree();
+            _characterToRescue = null ;
             AddRopePart();
         }
-        if(Input.IsActionJustPressed("interact") && _landingRay1.IsColliding() && _landingRay2.IsColliding()){
-            _rescueArea.Monitoring = true;
-            DelayedAreaDisabling(_rescueArea);
+        if(Input.IsActionJustReleased("detach")){
+            DetachLastRopePart();
+        }
+        if(Input.IsActionJustPressed("grab") && _grabBody !=null && _ropes.Count>0){
+            Grab(_grabBody, _ropes[_ropes.Count-1]);
+        }
+        else if(Input.IsActionJustReleased("grab") && _grabBody !=null && _ropes.Count>0){
+            Ungrab(_ropes[_ropes.Count-1]);
         }
         _velocity = _velocity.LinearInterpolate(_direction*Speed,Acceleration * delta);
         _animationPlayer.Play("EngineOn");
@@ -81,42 +83,70 @@ public class Player : KinematicBody
         
         var instance = ropePart.Instance<RopePart>();
         GetTree().Root.AddChild(instance);
-        Vector3 position = _rootJoint.GlobalTransform.origin;
-        position.y -= instance.GrabPosition.Translation.y;
-        instance.Translation = position;
-        _rootJoint.Nodes__nodeB = instance.GetPath();
-        if(_lastAddedRope!=null){
-            _lastAddedRope.Translate(Vector3.Down*(_lastAddedRope.GrabPosition.GlobalTransform.origin.DistanceTo(instance.NextJoin.GlobalTransform.origin)));
-            instance.LinkRopePart(_lastAddedRope);
+        
+        if(_ropes.Count == 0 ){
+            instance.Translation = _rootJoint.GlobalTransform.origin - instance.GrabPosition.GlobalTransform.origin;
+            _rootJoint.Nodes__nodeB = instance.GetPath();
+            _rescueArea.Monitoring = false;
+        } else {
+            var lastRope = _ropes[_ropes.Count-1];
+            instance.Translation = lastRope.NextJoin.GlobalTransform.origin - instance.GrabPosition.GlobalTransform.origin;
+            lastRope.LinkRopePart(instance);
+            
+            lastRope.RescueArea.Disconnect("body_entered",this,nameof(OnRescueAreaEntered));
+            lastRope.RescueArea.Disconnect("body_exited",this,nameof(OnRescueAreaExited));
         }
-        _lastAddedRope = instance;
+        _ropes.Add(instance);
+        instance.RescueArea.Connect("body_entered",this,nameof(OnRescueAreaEntered));
+        instance.RescueArea.Connect("body_exited",this,nameof(OnRescueAreaExited));
     }
-    
+
+    private void DetachLastRopePart(){
+        if(_ropes.Count == 0)
+            return;
+        var lastRope = _ropes[_ropes.Count-1];
+        
+        lastRope.RescueArea.Disconnect("body_entered",this,nameof(OnRescueAreaEntered));
+        lastRope.RescueArea.Disconnect("body_exited",this,nameof(OnRescueAreaExited));
+        if(_ropes.Count == 1 ){
+            _rescueArea.Monitoring = true;
+            _rootJoint.Nodes__nodeB = string.Empty;
+        }
+        else {
+            var preLastRope = _ropes[_ropes.Count-2];
+            preLastRope.RescueArea.Connect("body_entered",this,nameof(OnRescueAreaEntered));
+            preLastRope.RescueArea.Connect("body_exited",this,nameof(OnRescueAreaExited));
+            preLastRope.BreakJoin();
+        }
+        _ropes.Remove(lastRope);
+
+    }
+
+    private void Grab(RigidBody body, RopePart rope){
+        rope.LinkRopePart(body);     
+    }
+    private void Ungrab(RopePart rope){
+        rope.BreakJoin();
+    }
+
     public void OnRescueAreaEntered(Node body){
         GD.Print("Entered");
-        if(body is Character){
+        if(body is Character && ((Character)body).Type == Character.CharacterType.ROPE){
             GD.Print("Character Entered");
-            var character = (Character)body;
-            if(!character.IsConnected(nameof(Character.MovementEnd),this, nameof(OnCharacterMouvementEnd)))
-                character.Connect(nameof(Character.MovementEnd),this, nameof(OnCharacterMouvementEnd));
-            ((Character)body).Rescue(_rescuePosition);
+            _characterToRescue = (Character)body;
+        }else if(body is RigidBody && _ropes.Count >0){
+            _grabBody = ((RigidBody)body);
         }
     }
 
-    public void OnCharacterMouvementEnd(Character character){
-        GD.Print("Mouvement end for "+character.Name);
-        character.Disconnect(nameof(Character.MovementEnd),this, nameof(OnCharacterMouvementEnd));
-        if(_rescuePosition.GlobalTransform.origin.DistanceTo(new Vector3(GlobalTransform.origin.x, GlobalTransform.origin.y, character.GlobalTransform.origin.z))< 3.0f){
-            if(character.Type == Character.CharacterType.ROPE)
-                RopePartNumber ++;
-            character.QueueFree();
-            AddRopePart();
+    public void OnRescueAreaExited(Node body){
+        if(body is Character && ((Character)body).Type == Character.CharacterType.ROPE){
+            if( _characterToRescue ==  (Character)body){
+                _characterToRescue = null;
+            };
+        }else if (body is RigidBody && ((RigidBody)body) == _grabBody && _ropes.Count >0){
+            _grabBody = null;
         }
-    }
-
-    private async void DelayedAreaDisabling(Area area){
-        await ToSignal(GetTree().CreateTimer(1.0f),"timeout");
-        area.Monitoring = false;
     }
 
 }

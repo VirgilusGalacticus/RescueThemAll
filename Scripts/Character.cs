@@ -43,13 +43,6 @@ public class Character : KinematicBody
             MoveAndSlide(direction*Speed * delta);
         }
     }
-    
-    public void Rescue(Position3D target){
-        TargetPosition = target;
-        emitMoveEndSignal = true;
-        _animationPlayer.CurrentAnimation = walkAnimation;
-        _animationPlayer.GetAnimation(_animationPlayer.CurrentAnimation).Loop = true;
-    }
     public void OnWaitTimerTimeout(){
         //TODO : mettre en place le choix aléatoire de target
     }

@@ -88,13 +88,13 @@ tracks/1/keys = {
 }
 
 [node name="Helico01" instance=ExtResource( 1 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.00541978, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.00847226, 0 )
 
 [node name="Helice" parent="." index="1"]
-transform = Transform( -0.737854, 0, -0.67496, 0, 1, 0, 0.67496, 0, -0.737854, 0.0481557, 2.42646, -0.64016 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0481557, 2.42646, -0.64016 )
 
 [node name="Helice001" parent="." index="2"]
-transform = Transform( 0.000645713, 1, 0, 0.737854, -0.000476442, 0.67496, 0.67496, -0.000435831, -0.737854, 0.12874, 1.18092, -7.38616 )
+transform = Transform( 0.000649289, 1, 0, -1, 0.000649289, 0, 0, 0, 1, 0.12874, 1.18092, -7.38616 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." index="4"]
 reset_on_save = false

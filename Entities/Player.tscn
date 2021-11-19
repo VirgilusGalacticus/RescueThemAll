@@ -3,78 +3,68 @@
 [ext_resource path="res://Entities/RopePart.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Player.cs" type="Script" id=2]
 [ext_resource path="res://Scripts/Inventory.cs" type="Script" id=3]
-[ext_resource path="res://Models/Herited/Helico01.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Models/Herited/HelicoV2.tscn" type="PackedScene" id=4]
 
 [sub_resource type="BoxShape" id=5]
-extents = Vector3( 3.16267, 1.77915, 4.23559 )
+extents = Vector3( 1, 0.504, 1.39987 )
 
 [sub_resource type="BoxShape" id=6]
-extents = Vector3( 1.9553, 0.237496, 1 )
-
-[sub_resource type="SphereShape" id=7]
-radius = 1.68529
+extents = Vector3( 1.23052, 0.495896, 0.897443 )
 
 [sub_resource type="BoxShape" id=8]
-extents = Vector3( 2.23267, 0.761157, 1 )
+extents = Vector3( 0.818232, 1.25132, 0.905743 )
 
 [sub_resource type="BoxShape" id=9]
-extents = Vector3( 2.51621, 0.15784, 0.167726 )
+extents = Vector3( 1.11971, 0.15784, 0.167726 )
+
+[sub_resource type="BoxShape" id=10]
+extents = Vector3( 0.46544, 0.913371, 0.870212 )
 
 [node name="Player" type="KinematicBody"]
 collision_layer = 2
+collision_mask = 5
 script = ExtResource( 2 )
 _hingeJoint = NodePath("HingeJoint")
 ropePart = ExtResource( 1 )
-_helico = NodePath("Helico01")
+_helico = NodePath("HelicoV2")
 
 [node name="HingeJoint" type="HingeJoint" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.06267, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.44447, 0 )
 nodes/node_a = NodePath("..")
 angular_limit/enable = true
-angular_limit/upper = 20.0
-angular_limit/lower = -20.0
+angular_limit/upper = 45.0
+angular_limit/lower = -45.0
 angular_limit/relaxation = 0.01
 
 [node name="Inventory" type="Node" parent="."]
 script = ExtResource( 3 )
 
 [node name="RescueArea" type="Area" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.87011, 0 )
 collision_layer = 0
 collision_mask = 4
 
 [node name="CollisionShape" type="CollisionShape" parent="RescueArea"]
 shape = SubResource( 5 )
 
-[node name="LandingRay1" type="RayCast" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.02007, -1.88004, 0 )
-enabled = true
-cast_to = Vector3( 0, -0.3, 0 )
-
-[node name="LandingRay2" type="RayCast" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.64403, -1.90214, 0 )
-enabled = true
-cast_to = Vector3( 0, -0.3, 0 )
-
-[node name="Helico01" parent="." instance=ExtResource( 4 )]
-transform = Transform( -4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0 )
-
 [node name="CollisionShape2" type="CollisionShape" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.204573, -1.71466, 0 )
+transform = Transform( 0.955454, -0.295141, 0, 0.295141, 0.955454, 0, 0, 0, 1, -0.124972, -0.539758, 0 )
 shape = SubResource( 6 )
 
-[node name="CollisionShape" type="CollisionShape" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.331347, 0.372053, 0 )
-shape = SubResource( 7 )
-
 [node name="CollisionShape3" type="CollisionShape" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.235923, -0.241435, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00962122, -0.150928, 0 )
 shape = SubResource( 8 )
 
 [node name="CollisionShape4" type="CollisionShape" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.98493, 0.0957799, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0431, -0.364954, 0 )
 shape = SubResource( 9 )
 
-[node name="RescuePosition" type="Position3D" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.633702, -0.0307801 )
+[node name="CollisionShape5" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.648366, 0.182819, 0 )
+shape = SubResource( 10 )
+
+[node name="HelicoV2" parent="." instance=ExtResource( 4 )]
+transform = Transform( -4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0 )
 
 [connection signal="body_entered" from="RescueArea" to="." method="OnRescueAreaEntered"]
+[connection signal="body_exited" from="RescueArea" to="." method="OnRescueAreaExited"]
