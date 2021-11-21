@@ -15,6 +15,9 @@ public class Player : KinematicBody
     private NodePath _helico;
     [Export]
     public NodePath _hingeJoint { get; set; }
+    [Export]
+    public float MaxHeight { get; set; }=20f;
+    
     //TODO faire passer ropepart dans l'inventaire
     public int RopePartNumber { get; set; }
     private Vector3 _direction = new Vector3();
@@ -51,7 +54,7 @@ public class Player : KinematicBody
         if(Input.IsActionPressed("down")){
             _direction.y -= 1.0f;
         }
-        else if(Input.IsActionPressed("up")){
+        else if(Input.IsActionPressed("up") && GlobalTransform.origin.y < MaxHeight){
             _direction.y += 1.0f;
         }
         else {

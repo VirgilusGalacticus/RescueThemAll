@@ -4,6 +4,6 @@
 albedo_color = Color( 0.164706, 0.321569, 0.737255, 1 )
 emission_enabled = true
 emission = Color( 0.117647, 0.85098, 0.866667, 1 )
-emission_energy = 1.37
+emission_energy = 1.47
 emission_operator = 0
 emission_on_uv2 = false

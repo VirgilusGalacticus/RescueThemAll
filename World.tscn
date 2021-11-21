@@ -42,6 +42,7 @@ extents = Vector3( 0.5, 0.5, 0.5 )
 [sub_resource type="Environment" id=9]
 background_mode = 2
 background_sky = SubResource( 8 )
+glow_enabled = true
 
 [node name="World" type="Spatial"]
 
@@ -58,6 +59,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 45 )
 far = 150.0
 script = ExtResource( 3 )
 targetPath = NodePath("../Player")
+zAddedPosition = 25.0
 
 [node name="Character" parent="." instance=ExtResource( 4 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 113.166, 1.10352, 0 )
@@ -154,6 +156,7 @@ transform = Transform( 0.999552, 0, 0.0299279, 0, 1, 0, -0.0299279, 0, 0.999552,
 [node name="Door" parent="." instance=ExtResource( 9 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 128.364, 4.20272, 0 )
 LevierPath = NodePath("../Levier")
+OpenHeight = 5.0
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource( 9 )
