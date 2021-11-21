@@ -8,7 +8,7 @@ albedo_color = Color( 0.843137, 0.658824, 0.458824, 1 )
 [node name="Chung2" instance=ExtResource( 1 )]
 
 [node name="Armature" parent="." index="0"]
-transform = Transform( -0.0332277, -0.904269, 0.425668, -0.0186424, 0.42639, 0.904347, -0.999274, 0.0221139, -0.0310256, -0.00315916, 0.254337, 0.000612931 )
+transform = Transform( -0.496953, 0.275122, 0.82301, 0.328434, 0.937491, -0.115075, -0.803224, 0.213118, -0.556248, -0.0461276, 0.242838, -0.0106503 )
 
 [node name="Chung" parent="Armature/Skeleton" index="0"]
 material/0 = SubResource( 1 )

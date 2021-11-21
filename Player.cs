@@ -25,9 +25,13 @@ public class Player : KinematicBody
     private HingeJoint _rootJoint;
     private Area _rescueArea;
     private AnimationPlayer _animationPlayer;
-    private Character _characterToRescue;
+    private Node _characterToRescue;
     private Godot.Collections.Array<RopePart> _ropes = new Godot.Collections.Array<RopePart>();
     private RigidBody _grabBody;
+    [Signal]
+    public delegate void GrabEntered(bool canGrab);
+    [Signal]
+    public delegate void RopeExist(bool exist);
 
     public override void _Ready()
     {
@@ -51,7 +55,7 @@ public class Player : KinematicBody
         else {
             _direction.x = 0.0f;
         }
-        if(Input.IsActionPressed("down")){
+        if(Input.IsActionPressed("down") && GlobalTransform.origin.y > 1){
             _direction.y -= 1.0f;
         }
         else if(Input.IsActionPressed("up") && GlobalTransform.origin.y < MaxHeight){
@@ -72,7 +76,7 @@ public class Player : KinematicBody
         if(Input.IsActionJustPressed("grab") && _grabBody !=null && _ropes.Count>0){
             Grab(_grabBody, _ropes[_ropes.Count-1]);
         }
-        else if(Input.IsActionJustReleased("grab") && _grabBody !=null && _ropes.Count>0){
+        if(Input.IsActionJustReleased("grab") && _ropes.Count>0){
             Ungrab(_ropes[_ropes.Count-1]);
         }
         _velocity = _velocity.LinearInterpolate(_direction*Speed,Acceleration * delta);
@@ -103,6 +107,8 @@ public class Player : KinematicBody
         instance.IsLinked = true;
         instance.RescueArea.Connect("body_entered",this,nameof(OnRescueAreaEntered));
         instance.RescueArea.Connect("body_exited",this,nameof(OnRescueAreaExited));
+        EmitSignal(nameof(RopeExist), true);
+        EmitSignal(nameof(GrabEntered), false);
     }
 
     private void DetachLastRopePart(){
@@ -124,6 +130,9 @@ public class Player : KinematicBody
         }
         lastRope.IsLinked = false;
         _ropes.Remove(lastRope);
+        if(_ropes.Count == 0){
+            EmitSignal(nameof(RopeExist), false);
+        }
 
     }
 
@@ -135,10 +144,13 @@ public class Player : KinematicBody
     }
 
     public void OnRescueAreaEntered(Node body){
-        GD.Print("Entered");
         if(body is Character && ((Character)body).Type == Character.CharacterType.ROPE){
-            GD.Print("Character Entered");
+            EmitSignal(nameof(GrabEntered), true);
             _characterToRescue = (Character)body;
+        }else if(body is RopePart && !((RopePart)body).IsLinked){
+            EmitSignal(nameof(GrabEntered), true);
+            _characterToRescue = body;
+
         }else if(body is RigidBody && _ropes.Count >0){
             _grabBody = ((RigidBody)body);
         }
@@ -148,6 +160,7 @@ public class Player : KinematicBody
         if(body is Character && ((Character)body).Type == Character.CharacterType.ROPE){
             if( _characterToRescue ==  (Character)body){
                 _characterToRescue = null;
+                EmitSignal(nameof(GrabEntered), false);
             };
         }else if (body is RigidBody && ((RigidBody)body) == _grabBody && _ropes.Count >0){
             _grabBody = null;

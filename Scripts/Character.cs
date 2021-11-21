@@ -15,18 +15,26 @@ public class Character : KinematicBody
     bool emitMoveEndSignal;
     private Timer _timer;
     private AnimationPlayer _animationPlayer;
-    private static string idleAnimation = "Idle";
-    private static string walkAnimation = "Walking";
+    const string idleAnimation = "Idle";
+    const string walkAnimation = "Walking";
+    private Godot.Collections.Array<string> _dances = new Godot.Collections.Array<string>(){
+        "HipHop",
+        "Rumba"
+    } ;
     public override void _Ready()
     {
         _timer= GetNode<Timer>("WaitTimer");
         var rng= new RandomNumberGenerator();
+        rng.Randomize();
         _timer.WaitTime = rng.RandfRange(1.0f,3.0f);
         _timer.Start();
-        rng.Dispose();
         _animationPlayer = GetNode<AnimationPlayer>(_model+"/AnimationPlayer");
         _animationPlayer.CurrentAnimation = idleAnimation;
+        _animationPlayer.CurrentAnimation = _dances[rng.RandiRange(0,_dances.Count-1)];
+        _animationPlayer.GetAnimation(_animationPlayer.CurrentAnimation).Loop = true;
         _animationPlayer.Play();
+        
+        rng.Dispose();
     }
 
     public override void _PhysicsProcess(float delta)
