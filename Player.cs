@@ -62,7 +62,7 @@ public class Player : KinematicBody
         }
 
         if(Input.IsActionJustPressed("interact") && _characterToRescue !=null){
-            _characterToRescue.QueueFree();
+            _characterToRescue?.QueueFree();
             _characterToRescue = null ;
             AddRopePart();
         }
@@ -100,6 +100,7 @@ public class Player : KinematicBody
             lastRope.RescueArea.Disconnect("body_exited",this,nameof(OnRescueAreaExited));
         }
         _ropes.Add(instance);
+        instance.IsLinked = true;
         instance.RescueArea.Connect("body_entered",this,nameof(OnRescueAreaEntered));
         instance.RescueArea.Connect("body_exited",this,nameof(OnRescueAreaExited));
     }
@@ -121,6 +122,7 @@ public class Player : KinematicBody
             preLastRope.RescueArea.Connect("body_exited",this,nameof(OnRescueAreaExited));
             preLastRope.BreakJoin();
         }
+        lastRope.IsLinked = false;
         _ropes.Remove(lastRope);
 
     }
